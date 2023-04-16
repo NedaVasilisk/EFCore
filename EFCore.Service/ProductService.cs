@@ -22,7 +22,38 @@ public class ProductService : IProductService
     {
         this.context.Product.Add(product);
         this.context.SaveChanges();
+
         return product;
+    }
+
+    public void Delete(Func<Product, bool> filter, bool loadRalatedData = false)
+    {
+        var productsToDelete = (loadRalatedData) ? this.context.Product.Include(p => p.Categories).Where(filter).ToList() : this.context.Product.Where(filter).ToList();
+        if (productsToDelete != null)
+        {
+            this.context.Product.RemoveRange(productsToDelete);
+            this.context.SaveChanges();
+        }
+    }
+
+    public void Edit(int productIdToChange, string productName, string productDescription, decimal productPrice)
+    {
+        if (string.IsNullOrWhiteSpace(productName)
+            || string.IsNullOrWhiteSpace(productName)
+            || productPrice < 0
+            )
+        {
+            return;
+        }
+
+        var productToChange = GetProductById(productIdToChange);
+        if (productToChange != null)
+        {
+            productToChange.Name = productName;
+            productToChange.Description = productName;
+            productToChange.Price = productPrice;
+            context.SaveChanges();
+        }
     }
 
     public int LoadCategories(Product product)

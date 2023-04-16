@@ -20,6 +20,16 @@ public class OrderService : IOrderService
         return order;
     }
 
+    public void Delete(Func<Order, bool> filter, bool loadRelatedData = false)
+    {
+        var ordersToDelete = (loadRelatedData) ? this.context.Order.Include(p => p.Client).Where(filter).ToList() : this.context.Order.Where(filter).ToList();
+        if (ordersToDelete != null)
+        {
+            this.context.Order.RemoveRange(ordersToDelete);
+            this.context.SaveChanges();
+        }
+    }
+
     public List<Order> Search(Func<Order, bool> filter, bool loadRalatedData = false)
         => (loadRalatedData) ? this.context.Order.Include(p => p.Client).Where(filter).ToList() : this.context.Order.Where(filter).ToList();
 
